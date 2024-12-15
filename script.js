@@ -1,42 +1,79 @@
-// script.js
+document.addEventListener('DOMContentLoaded', function () {
+    const reminderForm = document.getElementById('reminderForm');
+    const reminderInput = document.getElementById('reminderInput');
+    const reminderDate = document.getElementById('reminderDate');
+    const reminderList = document.getElementById('reminderList');
 
-// Get the input field and the reminder list
-const reminderInput = document.getElementById("reminderInput");
-const reminderList = document.getElementById("reminderList");
+    // Load reminders from localStorage
+    const loadReminders = () => {
+        const reminders = JSON.parse(localStorage.getItem('reminders')) || [];
+        reminderList.innerHTML = '';
+        reminders.forEach((reminder, index) => {
+            const li = document.createElement('li');
+            const dueDate = new Date(reminder.dueDate).toLocaleString();
+            li.innerHTML = `
+                ${reminder.text} <br>
+                <strong>Due:</strong> ${dueDate}
+                <button onclick="deleteReminder(${index})">Delete</button>
+            `;
+            reminderList.appendChild(li);
 
-// Function to add a reminder
-function addReminder() {
-  const reminderText = reminderInput.value.trim();
-
-  // Ensure reminder text is not empty
-  if (reminderText !== "") {
-    const li = document.createElement("li");
-
-    // Create text node for the reminder and append to the li element
-    const textNode = document.createTextNode(reminderText);
-    li.appendChild(textNode);
-
-    // Create remove button and append to the li element
-    const removeButton = document.createElement("button");
-    removeButton.textContent = "Remove";
-    removeButton.onclick = function () {
-      reminderList.removeChild(li); // Remove the reminder from the list
+            // Check if the reminder is due now and show a notification
+            const timeUntilReminder = new Date(reminder.dueDate) - new Date();
+            if (timeUntilReminder <= 0) {
+                showNotification(reminder.text);
+            } else {
+                // Schedule notification if it's not due yet
+                setTimeout(() => showNotification(reminder.text), timeUntilReminder);
+            }
+        });
     };
-    li.appendChild(removeButton);
 
-    // Append the li element to the reminder list
-    reminderList.appendChild(li);
+    // Show browser notification
+    const showNotification = (message) => {
+        if (Notification.permission === "granted") {
+            new Notification("Reminder Alert", {
+                body: message,
+                icon: "https://via.placeholder.com/48"
+            });
+        }
+    };
 
-    // Clear the input field after adding the reminder
-    reminderInput.value = "";
-  } else {
-    alert("Please enter a reminder!");
-  }
-}
+    // Request notification permission on first load
+    if (Notification.permission !== "granted") {
+        Notification.requestPermission();
+    }
 
-// Allow user to press Enter to add a reminder
-reminderInput.addEventListener("keypress", function (event) {
-  if (event.key === "Enter") {
-    addReminder();
-  }
+    // Add a new reminder
+    reminderForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        const reminderText = reminderInput.value.trim();
+        const dueDateValue = reminderDate.value;
+
+        if (reminderText && dueDateValue) {
+            const reminder = {
+                text: reminderText,
+                dueDate: new Date(dueDateValue).toISOString(),
+            };
+
+            const reminders = JSON.parse(localStorage.getItem('reminders')) || [];
+            reminders.push(reminder);
+            localStorage.setItem('reminders', JSON.stringify(reminders));
+
+            reminderInput.value = '';
+            reminderDate.value = '';
+            loadReminders();
+        }
+    });
+
+    // Delete a reminder
+    window.deleteReminder = (index) => {
+        const reminders = JSON.parse(localStorage.getItem('reminders')) || [];
+        reminders.splice(index, 1);
+        localStorage.setItem('reminders', JSON.stringify(reminders));
+        loadReminders();
+    };
+
+    // Initial load
+    loadReminders();
 });
