@@ -1,23 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reminder4U</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reminder4U</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="container">
-    <h1>Reminder4U</h1>
+    <div class="container">
+        <h1>Reminder4U</h1>
+        <form id="reminderForm">
+            <input type="text" id="reminderInput" placeholder="Enter your reminder" required />
+            <input type="datetime-local" id="reminderDate" required />
+            <button type="submit">Add Reminder</button>
+        </form>
 
-    <div class="input-container">
-      <input type="text" id="reminderInput" placeholder="Enter your reminder">
-      <button onclick="addReminder()">Add Reminder</button>
+        <h2>Upcoming Reminders:</h2>
+        <ul id="reminderList"></ul>
     </div>
 
-    <ul id="reminderList"></ul>
-  </div>
-
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
